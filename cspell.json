@@ -1,5 +1,7 @@
 {
     "words": [
-        "bencodex"
+        "bencodex",
+        "comptime",
+        "errdefer"
     ]
 }
