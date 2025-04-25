@@ -39,17 +39,6 @@ This is a Zig project that follows idiomatic Zig practices and standards. The fo
 - Leverage comptime for generic code where beneficial
 - Consider using tagged unions for variant data
 
-## Project Structure
-
-```
-src/
-├── main.zig           # Application entry point
-├── components/        # Core components of the application
-├── utils/             # Utility functions and helpers
-├── tests/             # Test files
-└── build.zig          # Build script
-```
-
 ## Build System
 
 This project uses Zig's built-in build system. To build the project:
@@ -160,7 +149,7 @@ try doSomething(.{
 
 ## Additional Resources
 
-- [Zig Documentation](https://ziglang.org/documentation/master/)
+- [Zig Documentation](https://ziglang.org/documentation/0.14.0/)
 - [Zig Standard Library](https://ziglang.org/documentation/master/std/)
 - [Zig Community Wiki](https://github.com/zigtools/zls)
 - [Ziglings - Learn Zig by fixing tiny broken programs](https://github.com/ratfactor/ziglings)
