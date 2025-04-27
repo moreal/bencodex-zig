@@ -1,6 +1,6 @@
 const std = @import("std");
 
-pub const Error = error{
+pub const DecodeError = error{
     UnexpectedEof,
     InvalidFormat,
     MalformedInteger,
@@ -9,5 +9,9 @@ pub const Error = error{
     InvalidUtf8,
     Unsupported,
     OutOfMemory,
+    UnknownError,
+};
+
+pub const EncodeError = error{
     UnknownError,
 };

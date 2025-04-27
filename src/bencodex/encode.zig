@@ -5,10 +5,7 @@ const errors = @import("errors.zig");
 const Value = types.Value;
 const Dictionary = types.Dictionary;
 const Key = types.Key;
-const Error = errors.Error;
-const EncodeError = error{
-    EncodingError,
-};
+const Error = errors.EncodeError;
 
 fn keyLessThan(context: void, a: Key, b: Key) bool {
     _ = context;
@@ -45,9 +42,9 @@ fn keyLessThan(context: void, a: Key, b: Key) bool {
 
 pub fn encode(writer: std.io.AnyWriter, value: Value) anyerror!void {
     switch (value) {
-        .null => writer.writeByte('n') catch return EncodeError.EncodingError,
-        .true => writer.writeByte('t') catch return EncodeError.EncodingError,
-        .false => writer.writeByte('f') catch return EncodeError.EncodingError,
+        .null => try writer.writeByte('n'),
+        .true => try writer.writeByte('t'),
+        .false => try writer.writeByte('f'),
         .integer => |*i| try encodeInteger(writer, i),
         .binary => |binary| try encodeBinary(writer, binary),
         .text => |text| try encodeText(writer, text),
@@ -58,7 +55,7 @@ pub fn encode(writer: std.io.AnyWriter, value: Value) anyerror!void {
 
 fn encodeInteger(writer: std.io.AnyWriter, value: *const std.math.big.int.Managed) anyerror!void {
     const allocator = std.heap.page_allocator;
-    const string = value.toString(allocator, 10, .lower) catch return Error.MalformedInteger;
+    const string = value.toString(allocator, 10, .lower) catch return Error.UnknownError;
     defer allocator.free(string);
 
     try writer.writeByte('i');
@@ -74,7 +71,7 @@ fn encodeBinary(writer: std.io.AnyWriter, binary: []const u8) !void {
 
 fn encodeText(writer: std.io.AnyWriter, text: []const u8) !void {
     if (!std.unicode.utf8ValidateSlice(text)) {
-        return Error.InvalidUtf8;
+        return Error.UnknownError;
     }
 
     try writer.writeByte('u');
@@ -97,9 +94,9 @@ fn encodeDictionary(writer: std.io.AnyWriter, dict: Dictionary) !void {
     var keys = std.ArrayList(Key).init(std.heap.page_allocator);
     defer keys.deinit();
 
-    var iterator = dict.iterator();
-    while (iterator.next()) |entry| {
-        const key_copy: Key = switch (entry.key_ptr.*) {
+    var iterator = dict.keyIterator();
+    while (iterator.next()) |key_ptr| {
+        const key_copy: Key = switch (key_ptr.*) {
             .binary => |binary| .{ .binary = binary },
             .text => |text| .{ .text = text },
         };

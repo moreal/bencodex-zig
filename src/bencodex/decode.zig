@@ -7,7 +7,7 @@ const Key = types.Key;
 const Value = types.Value;
 const Dictionary = types.Dictionary;
 const DictionaryEntry = Dictionary.Entry;
-const Error = errors.Error;
+const Error = errors.DecodeError;
 
 fn Parser(comptime ReaderType: type) type {
     comptime io.validateReader(ReaderType);
