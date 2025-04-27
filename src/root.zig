@@ -2,12 +2,14 @@
 //! you are making an executable, the convention is to delete this file and
 //! start with main.zig instead.
 const std = @import("std");
-const testing = std.testing;
 
-pub export fn add(a: i32, b: i32) i32 {
-    return a + b;
-}
+// Bencodex 모듈 내보내기
+pub const bencodex = struct {
+    pub const types = @import("bencodex/types.zig");
+    pub const encode = @import("bencodex/encode.zig");
+    pub const decode = @import("bencodex/decode.zig");
+    pub const errors = @import("bencodex/errors.zig");
+};
 
-test "basic add functionality" {
-    try testing.expect(add(3, 7) == 10);
-}
+// Export all submodules
+pub usingnamespace bencodex;
