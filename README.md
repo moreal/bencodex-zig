@@ -16,13 +16,7 @@ One of Bencodex's key features is forced normalization, where only a single vali
 ## Installation
 
 ```bash
-# Using zig package manager
-zig fetch --save https://github.com/moreal/bencodex-zig/archive/<version>.tar.gz
-
-# Or manually clone and build
-git clone https://github.com/moreal/bencodex-zig.git
-cd bencodex-zig
-zig build
+zig fetch --save git+https://github.com/moreal/bencodex-zig#main
 ```
 
 ## Usage
