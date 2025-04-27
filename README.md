@@ -19,19 +19,26 @@ One of Bencodex's key features is forced normalization, where only a single vali
 zig fetch --save git+https://github.com/moreal/bencodex-zig#main
 ```
 
+Then append the following lines to your `build.zig` file:
+
+```zig
+const bencodex = b.dependency("bencodex", .{});
+exe.root_module.addImport("bencodex", bencodex.module("bencodex"));
+```
+
 ## Usage
 
 ### Importing
 
 ```zig
-const bencodex = @import("bencodex-zig");
+const bencodex = @import("bencodex");
 ```
 
 ### Encoding
 
 ```zig
 const std = @import("std");
-const bencodex = @import("bencodex-zig");
+const bencodex = @import("bencodex");
 
 const Value = bencodex.types.Value;
 const encode = bencodex.encode;
@@ -61,7 +68,7 @@ pub fn main() !void {
 
 ```zig
 const std = @import("std");
-const bencodex = @import("bencodex-zig");
+const bencodex = @import("bencodex");
 
 const decode = bencodex.decode;
 
@@ -91,7 +98,7 @@ pub fn main() !void {
 
 ```zig
 const std = @import("std");
-const bencodex = @import("bencodex-zig");
+const bencodex = @import("bencodex");
 
 const Value = bencodex.types.Value;
 const Key = bencodex.types.Key;
@@ -135,44 +142,6 @@ pub fn createComplexValue(allocator: std.mem.Allocator) !Value {
 }
 ```
 
-## Supported Data Types
-
-- `null` - Null value
-- `true`, `false` - Boolean values
-- `integer` - Arbitrary precision integer
-- `binary` - Byte string
-- `text` - Unicode string
-- `list` - List of values
-- `dictionary` - Collection of key-value pairs (lexicographically ordered)
-
-## Error Handling
-
-The library uses Zig's error union types for functions that can fail:
-
-```zig
-const DecodingError = error{
-    InvalidFormat,
-    UnexpectedEOF,
-    UnexpectedToken,
-    // Other specific errors...
-};
-
-pub fn decode(reader: anytype) !Value {
-    // Implementation that returns a value or an error
-}
-```
-
-## Memory Management
-
-Most functions in this library accept an allocator and return allocated resources. It's the caller's responsibility to free these resources:
-
-```zig
-// Allocate a value
-const value = try decode.decodeAlloc(allocator, data);
-// Free the value when done
-defer value.deinit(allocator);
-```
-
 ## Testing
 
 ```bash
@@ -183,7 +152,7 @@ This library includes a comprehensive test suite that validates compliance with 
 
 ## License
 
-This project is distributed under the [LICENSE_NAME] license. See the LICENSE file for details.
+This project is distributed under the MIT license. See the [LICENSE](./LICENSE) file for details.
 
 ## References
 
