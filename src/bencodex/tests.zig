@@ -13,10 +13,8 @@ const Value = types.Value;
 const Key = types.Key;
 const Dictionary = types.Dictionary;
 
-/// 테스트 스위트 디렉토리 경로
 const TESTSUITE_DIR = "spec/testsuite";
 
-/// 테스트 데이터를 위한 구조체
 const TestData = struct {
     name: []const u8,
     dat_path: []const u8,
@@ -31,16 +29,13 @@ fn bigIntFromString(allocator: Allocator, value: []const u8) !BigInt {
     return integer;
 }
 
-/// 테스트 파일 목록을 얻는 함수
 fn getTestFiles(allocator: Allocator) ![]TestData {
     var test_files = std.ArrayList(TestData).init(allocator);
     defer test_files.deinit();
 
-    // 디렉토리 열기
     var dir = try fs.cwd().openDir(TESTSUITE_DIR, .{ .iterate = true });
     defer dir.close();
 
-    // 모든 .dat 파일을 찾아 TestData 생성
     var it = dir.iterate();
     while (try it.next()) |entry| {
         if (entry.kind != .file) continue;
@@ -64,7 +59,6 @@ fn getTestFiles(allocator: Allocator) ![]TestData {
     return test_files.toOwnedSlice();
 }
 
-/// .dat 파일에서 인코딩된 Bencodex 데이터를 읽는 함수
 fn readDatFile(allocator: Allocator, path: []const u8) ![]u8 {
     const file = try fs.cwd().openFile(path, .{});
     defer file.close();
@@ -82,31 +76,24 @@ fn readDatFile(allocator: Allocator, path: []const u8) ![]u8 {
 }
 
 test "Run Bencodex testsuite" {
-    // 테스트 메모리 할당자 사용
     var arena = std.heap.ArenaAllocator.init(testing.allocator);
     defer arena.deinit();
     const allocator = arena.allocator();
 
-    // 테스트 파일 목록 얻기
     const test_files = try getTestFiles(allocator);
 
-    // 개별 테스트 실행
     print("\nRunning {d} testsuite files:\n", .{test_files.len});
     for (test_files) |test_data| {
         print("Test: {s}...", .{test_data.name});
 
-        // .dat 파일에서 인코딩된 데이터 읽기
         const encoded_data = try readDatFile(allocator, test_data.dat_path);
 
-        // 디코딩
         const value = try decode.decodeAlloc(allocator, encoded_data);
         defer value.deinit(allocator);
 
-        // 인코딩
         const reencoded_data = try encode.encodeAlloc(allocator, value);
         defer allocator.free(reencoded_data);
 
-        // 원본과 재인코딩된 데이터가 일치하는지 확인
         try testing.expectEqualSlices(u8, encoded_data, reencoded_data);
 
         print("OK\n", .{});
@@ -114,7 +101,6 @@ test "Run Bencodex testsuite" {
 }
 
 test "null value" {
-    // null value 테스트
     const allocator = testing.allocator;
 
     const value = Value{ .null = {} };
@@ -130,7 +116,6 @@ test "null value" {
 test "boolean value" {
     const allocator = testing.allocator;
 
-    // true 테스트
     {
         const value = Value{ .boolean = true };
         const encoded = try encode.encodeAlloc(allocator, value);
@@ -142,7 +127,6 @@ test "boolean value" {
         try testing.expectEqual(true, decoded.boolean);
     }
 
-    // false 테스트
     {
         const value = Value{ .boolean = false };
         const encoded = try encode.encodeAlloc(allocator, value);
@@ -158,7 +142,6 @@ test "boolean value" {
 test "integer value" {
     const allocator = testing.allocator;
 
-    // 양수 테스트
     {
         const value = Value{ .integer = try bigIntFromString(allocator, "123") };
         defer value.deinit(allocator);
@@ -177,7 +160,6 @@ test "integer value" {
         try testing.expect(expected.eql(decoded.integer));
     }
 
-    // 음수 테스트
     {
         const value = Value{ .integer = try bigIntFromString(allocator, "-456") };
         defer value.deinit(allocator);
@@ -199,7 +181,6 @@ test "integer value" {
         try testing.expect(expected.eql(decoded.integer));
     }
 
-    // 0 테스트
     {
         const value = Value{ .integer = try bigIntFromString(allocator, "0") };
         defer value.deinit(allocator);
@@ -221,9 +202,8 @@ test "integer value" {
         try testing.expect(expected.eql(decoded.integer));
     }
 
-    // 매우 큰 정수 테스트
     {
-        const value = Value{ .integer = try bigIntFromString(allocator, "9223372036854775807123456789") }; // i64 최댓값보다 큰 값
+        const value = Value{ .integer = try bigIntFromString(allocator, "9223372036854775807123456789") };
         defer value.deinit(allocator);
         const encoded = try encode.encodeAlloc(allocator, value);
         defer allocator.free(encoded);
@@ -247,7 +227,6 @@ test "integer value" {
 test "binary string" {
     const allocator = testing.allocator;
 
-    // 일반 바이너리 문자열 테스트
     {
         const data = "Hello, world!";
         const value = Value{ .binary = data };
@@ -261,7 +240,6 @@ test "binary string" {
         try testing.expectEqualSlices(u8, data, decoded.binary);
     }
 
-    // 비어있는 바이너리 문자열 테스트
     {
         const data = "";
         const value = Value{ .binary = data };
@@ -279,7 +257,6 @@ test "binary string" {
 test "text string" {
     const allocator = testing.allocator;
 
-    // ASCII 텍스트 테스트
     {
         const text = "Hello, world!";
         const value = Value{ .text = text };
@@ -293,9 +270,8 @@ test "text string" {
         try testing.expectEqualSlices(u8, text, decoded.text);
     }
 
-    // 유니코드 텍스트 테스트
     {
-        const text = "안녕, 세계!"; // UTF-8 인코딩된 한글
+        const text = "안녕, 세계!";
         const value = Value{ .text = text };
         const encoded = try encode.encodeAlloc(allocator, value);
         defer allocator.free(encoded);
@@ -311,7 +287,6 @@ test "text string" {
 test "list" {
     const allocator = testing.allocator;
 
-    // 여러 타입을 포함한 리스트 테스트
     var integer = try BigInt.init(allocator);
     try integer.setString(10, "42");
     defer integer.deinit();

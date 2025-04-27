@@ -7,15 +7,12 @@ const Dictionary = types.Dictionary;
 const Key = types.Key;
 const Error = errors.Error;
 const EncodeError = error{
-    /// 인코딩 중 오류 발생
     EncodingError,
 };
 
-// 키 정렬을 위한 비교 함수
 fn keyLessThan(context: void, a: Key, b: Key) bool {
     _ = context;
 
-    // 1. 바이너리 문자열이 유니코드 문자열보다 앞에 와야 함
     const a_is_binary = switch (a) {
         .binary => true,
         .text => false,
@@ -34,15 +31,14 @@ fn keyLessThan(context: void, a: Key, b: Key) bool {
         return false;
     }
 
-    // 2. 같은 타입일 경우 바이트 순서로 비교
     return switch (a) {
         .binary => |a_binary| switch (b) {
             .binary => |b_binary| std.mem.lessThan(u8, a_binary, b_binary),
-            else => unreachable, // 이전 조건에서 처리됨
+            else => unreachable,
         },
         .text => |a_text| switch (b) {
             .text => |b_text| std.mem.lessThan(u8, a_text, b_text),
-            else => unreachable, // 이전 조건에서 처리됨
+            else => unreachable,
         },
     };
 }
@@ -97,13 +93,11 @@ fn encodeList(writer: std.io.AnyWriter, list: []const Value) !void {
 fn encodeDictionary(writer: std.io.AnyWriter, dict: Dictionary) !void {
     try writer.writeByte('d');
 
-    // 스펙에 따라 키를 정렬하기 위해 모든 키를 수집합니다
     var keys = std.ArrayList(Key).init(std.heap.page_allocator);
     defer keys.deinit();
 
     var iterator = dict.iterator();
     while (iterator.next()) |entry| {
-        // 키 복사본을 만듭니다
         const key_copy: Key = switch (entry.key_ptr.*) {
             .binary => |binary| .{ .binary = binary },
             .text => |text| .{ .text = text },
@@ -111,17 +105,15 @@ fn encodeDictionary(writer: std.io.AnyWriter, dict: Dictionary) !void {
         try keys.append(key_copy);
     }
 
-    // 스펙에 따라 키를 정렬합니다
     std.sort.pdq(Key, keys.items, {}, keyLessThan);
 
-    // 정렬된 순서대로 키와 값을 인코딩합니다
     for (keys.items) |key| {
         switch (key) {
             .binary => |binary| try encodeBinary(writer, binary),
             .text => |text| try encodeText(writer, text),
         }
 
-        const value = dict.get(key) orelse unreachable; // dict에서 가져온 키이므로 항상 존재합니다
+        const value = dict.get(key) orelse unreachable;
         try encode(writer, value);
     }
 
