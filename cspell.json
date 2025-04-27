@@ -2,6 +2,8 @@
     "words": [
         "bencodex",
         "comptime",
-        "errdefer"
+        "errdefer",
+        "usingnamespace",
+        "deinit"
     ]
 }
