@@ -57,7 +57,7 @@ fn parseValue(parser: anytype) anyerror!Value {
     const marker = try parser.readByte();
 
     return switch (marker) {
-        'n' => Value{ .null = {} },
+        'n' => Value.null,
         't' => Value.true,
         'f' => Value.false,
         'i' => try parseInteger(parser),
@@ -257,7 +257,7 @@ fn parseValueWithFirstByte(parser: anytype, first_byte: u8) anyerror!Value {
     comptime assertParserType(@TypeOf(parser));
 
     return switch (first_byte) {
-        'n' => Value{ .null = {} },
+        'n' => Value.null,
         't' => Value.true,
         'f' => Value.false,
         'i' => try parseInteger(parser),

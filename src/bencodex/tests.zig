@@ -103,7 +103,7 @@ test "Run Bencodex testsuite" {
 test "null value" {
     const allocator = testing.allocator;
 
-    const value = Value{ .null = {} };
+    const value = Value.null;
     const encoded = try encode.encodeAlloc(allocator, value);
     defer allocator.free(encoded);
 
@@ -292,7 +292,7 @@ test "list" {
     defer integer.deinit();
 
     var items = [_]Value{
-        Value{ .null = {} },
+        Value.null,
         Value.true,
         Value{ .integer = integer },
         Value{ .binary = "hello" },
