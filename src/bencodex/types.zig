@@ -63,7 +63,9 @@ pub const Value = union(enum) {
 
     null,
 
-    boolean: bool,
+    true,
+
+    false,
 
     integer: std.math.big.int.Managed,
 
@@ -96,7 +98,8 @@ pub const Value = union(enum) {
     pub fn clone(self: Self, allocator: std.mem.Allocator) !Self {
         return switch (self) {
             .null => .null,
-            .boolean => |b| .{ .boolean = b },
+            .true => .true,
+            .false => .false,
             .integer => |*integer| .{
                 .integer = try integer.clone(),
             },

@@ -46,7 +46,8 @@ fn keyLessThan(context: void, a: Key, b: Key) bool {
 pub fn encode(writer: std.io.AnyWriter, value: Value) anyerror!void {
     switch (value) {
         .null => writer.writeByte('n') catch return EncodeError.EncodingError,
-        .boolean => |b| writer.writeByte(if (b) 't' else 'f') catch return EncodeError.EncodingError,
+        .true => writer.writeByte('t') catch return EncodeError.EncodingError,
+        .false => writer.writeByte('f') catch return EncodeError.EncodingError,
         .integer => |*i| try encodeInteger(writer, i),
         .binary => |binary| try encodeBinary(writer, binary),
         .text => |text| try encodeText(writer, text),

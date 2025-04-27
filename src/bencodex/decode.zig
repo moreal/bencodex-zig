@@ -58,8 +58,8 @@ fn parseValue(parser: anytype) anyerror!Value {
 
     return switch (marker) {
         'n' => Value{ .null = {} },
-        't' => Value{ .boolean = true },
-        'f' => Value{ .boolean = false },
+        't' => Value.true,
+        'f' => Value.false,
         'i' => try parseInteger(parser),
         'l' => try parseList(parser),
         'd' => try parseDictionary(parser),
@@ -258,8 +258,8 @@ fn parseValueWithFirstByte(parser: anytype, first_byte: u8) anyerror!Value {
 
     return switch (first_byte) {
         'n' => Value{ .null = {} },
-        't' => Value{ .boolean = true },
-        'f' => Value{ .boolean = false },
+        't' => Value.true,
+        'f' => Value.false,
         'i' => try parseInteger(parser),
         'l' => try parseList(parser),
         'd' => try parseDictionary(parser),

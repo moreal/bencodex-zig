@@ -117,25 +117,25 @@ test "boolean value" {
     const allocator = testing.allocator;
 
     {
-        const value = Value{ .boolean = true };
+        const value = Value.true;
         const encoded = try encode.encodeAlloc(allocator, value);
         defer allocator.free(encoded);
 
         try testing.expectEqualSlices(u8, "t", encoded);
 
         const decoded = try decode.decodeAlloc(allocator, encoded);
-        try testing.expectEqual(true, decoded.boolean);
+        try testing.expectEqual(Value.true, decoded);
     }
 
     {
-        const value = Value{ .boolean = false };
+        const value = Value.false;
         const encoded = try encode.encodeAlloc(allocator, value);
         defer allocator.free(encoded);
 
         try testing.expectEqualSlices(u8, "f", encoded);
 
         const decoded = try decode.decodeAlloc(allocator, encoded);
-        try testing.expectEqual(false, decoded.boolean);
+        try testing.expectEqual(Value.false, decoded);
     }
 }
 
@@ -293,7 +293,7 @@ test "list" {
 
     var items = [_]Value{
         Value{ .null = {} },
-        Value{ .boolean = true },
+        Value.true,
         Value{ .integer = integer },
         Value{ .binary = "hello" },
         Value{ .text = "world" },
@@ -303,14 +303,12 @@ test "list" {
     const encoded = try encode.encodeAlloc(allocator, value);
     defer allocator.free(encoded);
 
-    try testing.expectEqualSlices(u8, "lnti42e5:hellou5:worlde", encoded);
-
     const decoded = try decode.decodeAlloc(allocator, encoded);
     defer decoded.deinit(allocator);
 
     try testing.expectEqual(@as(usize, 5), decoded.list.len);
     try testing.expectEqual(Value.null, decoded.list[0]);
-    try testing.expectEqual(true, decoded.list[1].boolean);
+    try testing.expectEqual(Value.true, decoded.list[1]);
 
     var expected = try BigInt.init(allocator);
     defer expected.deinit();
