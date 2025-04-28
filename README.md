@@ -131,8 +131,8 @@ pub fn createComplexValue(allocator: std.mem.Allocator) !Value {
         var list = try allocator.alloc(Value, 3);
         
         list[0] = Value{ .text = "item1" };
-        list[1] = Value{ .null = {} };
-        list[2] = Value{ .true = {} };
+        list[1] = Value.null;
+        list[2] = Value.true;
         
         const value = Value{ .list = list };
         try dict.put(key, value);
